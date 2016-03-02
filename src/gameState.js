@@ -1,5 +1,6 @@
 var gameState = function(game) {
 
+  //variables
   var bg;
   var player;
   var cursors;
@@ -11,32 +12,33 @@ var gameState = function(game) {
 
 
 
-  var preload = function() {
+  var preload = function() { //load in image assets
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.image('background', 'assets/background2.png');
     game.load.image('evil_ball', 'assets/evil_ball.png');
   }
 
   var create = function() {
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    game.physics.startSystem(Phaser.Physics.ARCADE); //we will use arcade physics the simplest
 
-    game.time.desiredFps = 30;
+    game.time.desiredFps = 30;//how many times per second update is called
 
-    bg = game.add.tileSprite(0, 0, 800, 480, 'background');
+    bg = game.add.tileSprite(0, 0, 800, 480, 'background'); //just adds the background, tilesprite will make it repeat
 
-    player = game.add.sprite(400, 400, 'dude');
-    game.physics.enable(player, Phaser.Physics.ARCADE);
+    player = game.add.sprite(400, 400, 'dude'); //add new player
+    game.physics.enable(player, Phaser.Physics.ARCADE); //add the player to the arcade physics system
 
-    player.body.collideWorldBounds = true;
-    player.body.setSize(20, 32, 5, 16);
-    player.body.gravity.y = 1000;
+    player.body.collideWorldBounds = true; //player will collide with the sides of the screen
+    player.body.setSize(20, 32, 5, 16); //set hitbox of player
+    player.body.gravity.y = 1000; //give teh player gravity
 
     cursors = game.input.keyboard.createCursorKeys();
 
-    evilBalls = game.add.group();
-    evilBalls.enableBody = true;
-    evilBalls.physicsBodyType = Phaser.Physics.ARCADE;
+    evilBalls = game.add.group();// creates a phaser group for collision detection and other reasons
+    evilBalls.enableBody = true; //allows balls to collide
+    evilBalls.physicsBodyType = Phaser.Physics.ARCADE; //specify that balls use the arcade physics system
 
+    //this creates enemies and assign controllers to them
     for (i = 0; i < 15; ++i) {
       var b = evilBalls.create(game.world.randomX, Math.random() * 280 + 100, 'evil_ball'); //the reason for the y being constrained is so the player doesnt immediately lose
       var controller = new evilBallController(b);
@@ -61,7 +63,7 @@ var gameState = function(game) {
 
   }
 
-  var update = function() {
+  var update = function() { //this is called automatically by phaser many times a second, we place methods in here that need to be continuously called
     movePlayer();
     moveBalls();
     updateScore();
@@ -69,7 +71,7 @@ var gameState = function(game) {
     game.physics.arcade.collide(player, evilBalls, hitBall);
   }
 
-  var movePlayer = function() {
+  var movePlayer = function() { //this handles the various player movements
 
     player.body.velocity.x = 0;
 
@@ -97,8 +99,7 @@ var gameState = function(game) {
     }
   };
 
-  var hitBall = function() {
-    //what happens when the player colldies with a ball
+  var hitBall = function() { //this is whats called when the player collides w/ a ball, it launches the game over state and sends that state the score
     for (controller in ballControllers) {
       delete ballControllers[controller];
     }
@@ -107,7 +108,7 @@ var gameState = function(game) {
     game.state.start("GameOverState", true, true, score);
   }
 
-  var updateScore = function(){
+  var updateScore = function(){ //this icrements the score each second you stay alive
     if(game.time.now > scoreTimer){
       ++score;
       scoreTimer = game.time.now + 1000;
@@ -115,7 +116,7 @@ var gameState = function(game) {
     scoreText.setText("Score: " + score);
   };
 
-  var resetGame = function(){
+  var resetGame = function(){  //resets game to starting state pretty much
     score = 0;
     scoreTimer = 0;
     timer = 0;
